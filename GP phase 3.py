@@ -1,10 +1,10 @@
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
+from tkinter import messagebox, ttk, filedialog
+import os
 
 def check_login():
-    entered_username = username_entry.get().lower()
-    entered_password = password_entry.get().lower()
+    entered_username = username_entry.get()
+    entered_password = password_entry.get()
     if entered_username == "admin" and entered_password == "password":
         root.withdraw()
         ask_class_window = tk.Toplevel(root)
@@ -21,7 +21,7 @@ def check_login():
         class_entry = tk.Entry(ask_class_window)
         class_entry.pack()
 
-        submit_button = tk.Button(ask_class_window, text="Submit", command=submit_class)
+        submit_button = tk.Button(ask_class_window, text="Submit", command=submit_class,bg="#2ecc71")
         submit_button.pack()
 
         ask_class_window.geometry("300x150")
@@ -46,8 +46,33 @@ def open_class_window(user_class):
         label = tk.Label(page, text=f"Content for {title}")
         label.pack(padx=10, pady=10)
 
+        upload_button = tk.Button(page, text="Upload File", command=lambda t=title: upload_file(t, notebook))
+        upload_button.pack(pady=10)
+
+        text_widget = tk.Text(page, wrap='word', height=2, state='disabled')
+        text_widget.pack(expand=True, fill='both', padx=10, pady=10)
+
     class_window.geometry("400x300")
     class_window.configure(bg="#3498db")
+
+def upload_file(week_title, notebook):
+    file_path = filedialog.askopenfilename(filetypes=[("Text files", ".txt")])
+    if file_path:
+        filename = os.path.basename(file_path)
+
+        text_widget = notebook.winfo_children()[notebook.index(notebook.select())].winfo_children()[2]
+        text_widget.configure(state='normal')
+
+        text_widget.insert(tk.END, f"{filename}\n")
+
+        text_widget.tag_configure("clickable", foreground="blue", underline=True)
+        text_widget.tag_bind("clickable", "<Button-1>", lambda event, path=file_path: open_file(path))
+        text_widget.insert(tk.END, "Open\n", "clickable")
+
+        text_widget.configure(state='disabled')
+
+def open_file(file_path):
+    os.startfile(file_path)
 
 root = tk.Tk()
 root.title("login CSC110")
